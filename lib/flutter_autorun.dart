@@ -11,13 +11,16 @@ class FlutterRunProcessHandler {
       caseSensitive: false,
       multiLine: false);
 
-  static RegExp _restartedApplicationSuccess =
-    RegExp(r"Restarted application (.*)ms.", caseSensitive: false, multiLine: false);
+  static RegExp _restartedApplicationSuccess = RegExp(
+      r"Restarted application (.*)ms.",
+      caseSensitive: false,
+      multiLine: false);
 
   static RegExp _noConnectedDeviceRegex =
-    RegExp(r"no connected device", caseSensitive: false, multiLine: false);
+      RegExp(r"no connected device", caseSensitive: false, multiLine: false);
 
-  static RegExp _finished = RegExp(r"Application (.*)\.", caseSensitive: false, multiLine: false);
+  static RegExp _finished =
+      RegExp(r"Application (.*)\.", caseSensitive: false, multiLine: false);
 
   Process _runningProcess;
   Stream<String> _processStdoutStream;
@@ -28,8 +31,8 @@ class FlutterRunProcessHandler {
   FlutterRunProcessHandler(this._appTarget, this._workingDirectory);
 
   Future<void> run() async {
-    _runningProcess = await Process.start(
-        "flutter", ["run", "--target=$_appTarget", "--observatory-port", "8888"],
+    _runningProcess = await Process.start("flutter",
+        ["run", "--target=$_appTarget", "--observatory-port", "8888"],
         workingDirectory: _workingDirectory, runInShell: true);
     _processStdoutStream =
         _runningProcess.stdout.transform(utf8.decoder).asBroadcastStream();
@@ -44,7 +47,8 @@ class FlutterRunProcessHandler {
   Future restart() async {
     if (_runningProcess != null) {
       _runningProcess.stdin.write("R");
-      return waitForConsoleMessage(_restartedApplicationSuccess,
+      return waitForConsoleMessage(
+          _restartedApplicationSuccess,
           "Timeout waiting for app restart",
           "${FAIL_COLOUR}No connected devices found to run app on and tests against$RESET_COLOUR");
     }
@@ -81,15 +85,15 @@ class FlutterRunProcessHandler {
         timer?.cancel();
         sub?.cancel();
         if (!completer.isCompleted) {
-          completer.complete(
-              search.firstMatch(logLine).group(1));
+          completer.complete(search.firstMatch(logLine).group(1));
         }
       } else if (_noConnectedDeviceRegex.hasMatch(logLine)) {
         timer?.cancel();
         sub?.cancel();
         if (!completer.isCompleted) {
           stderr.writeln(failMessage);
-          completer.completeError(new Exception("no device running to test against"));
+          completer.completeError(
+              new Exception("no device running to test against"));
         }
       }
     }, cancelOnError: true);
@@ -103,12 +107,12 @@ class FlutterRunProcessHandler {
     });
 
     return completer.future;
-
   }
 
   Future<String> waitForObservatoryDebuggerUri(
       [Duration timeout = const Duration(seconds: 60)]) {
-    return waitForConsoleMessage(_observatoryDebuggerUriRegex,
+    return waitForConsoleMessage(
+        _observatoryDebuggerUriRegex,
         "Timeout while wait for observatory debugger uri",
         "${FAIL_COLOUR}No connected devices found to run app on and tests against$RESET_COLOUR");
   }
@@ -119,6 +123,4 @@ class FlutterRunProcessHandler {
           "FlutterRunProcessHandler: flutter run process is not active");
     }
   }
-
 }
-

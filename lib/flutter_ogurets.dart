@@ -25,7 +25,8 @@ class FlutterOgurets {
 
     if (Platform.environment['VM_SERVICE_URL'] != null) {
       _port = Platform.environment['VM_SERVICE_URL'];
-    } else { // run the app and get its port no. This also allows restart to work.
+    } else {
+      // run the app and get its port no. This also allows restart to work.
       if (_targetApp == null) {
         var app = Platform.script.toFilePath();
         // standard integration tests (the only type that will use Flutter World)
@@ -124,7 +125,6 @@ class FlutterOgurets {
 
     // now wait for 2 seconds and then reconnect - not waiting causes it to fail
     Timer(Duration(milliseconds: _waitDelayAfterRestartInMilliseconds), () {
-
       FlutterDriver.connect(dartVmServiceUrl: _port).then((_d) {
         this._driver = _d;
         c.complete();
@@ -151,6 +151,5 @@ class FlutterOgurets {
       await _handler.terminate();
       _handler = null;
     }
-
   }
 }
