@@ -9,6 +9,14 @@ to the beginning without having to quit and rerun the application
 - Terminating the application (or not) on completion
 - Allowing you to set a default for restarts or no-restarts and use Gherkin tags to control behaviour.
 
+## installing
+
+in your `dev_dependencies` section in your `pubspec.yaml` include:
+
+`  ogurets_flutter: ^1.1.1`
+
+or whichever is the higher version you see on this page.
+
 ## notes
 
 *ogurets flutter* cannot be used from the command line tool `flutter driver` because it needs to know what 

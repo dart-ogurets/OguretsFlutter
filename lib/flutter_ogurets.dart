@@ -26,18 +26,23 @@ class FlutterOgurets {
     if (Platform.environment['VM_SERVICE_URL'] != null) {
       _port = Platform.environment['VM_SERVICE_URL'];
     } else {
+      var runApp = _targetApp;
       // run the app and get its port no. This also allows restart to work.
-      if (_targetApp == null) {
-        var app = Platform.script.toFilePath();
+      if (runApp == null) {
+        var app = Platform.environment['OGURETS_FLUTTER_APP'] ?? Platform.script.toFilePath();
         // standard integration tests (the only type that will use Flutter World)
         // use X_test.dart (test runner) and X.dart (app runner)
         if (app.endsWith("_test.dart")) {
-          app = app.substring(0, app.length - "_test.dart".length) + ".dart";
+          runApp = app.substring(0, app.length - "_test.dart".length) + ".dart";
         }
       }
 
+      if (runApp == null) {
+        throw Exception("Cannot determine how to run or connect to the application.");
+      }
+
       _log.info("Waiting for application to start and expose port.");
-      await _run();
+      await _run(runApp);
 
       _canReset = true;
     }
@@ -70,8 +75,8 @@ class FlutterOgurets {
     this._workingDirectory = _workingDirectory;
   }
 
-  Future _run() async {
-    _handler = FlutterRunProcessHandler('test_driver/run.dart', '.');
+  Future _run(String runApp) async {
+    _handler = FlutterRunProcessHandler(runApp, Platform.environment['OGURETS_FLUTTER_WORKDIR'] ?? '.');
     await _handler.run();
     _port = await _handler.waitForObservatoryDebuggerUri();
     _log.info("application started, exposed observatory port $_port");
