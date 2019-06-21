@@ -76,7 +76,12 @@ class FlutterOgurets {
   }
 
   Future _run(String runApp) async {
-    _handler = FlutterRunProcessHandler(runApp, Platform.environment['OGURETS_FLUTTER_WORKDIR'] ?? '.');
+    _handler = FlutterRunProcessHandler(runApp,
+        Platform.environment['OGURETS_FLUTTER_WORKDIR'] ?? '.',
+        observatoryPort: Platform.environment['OGURETS_FLUTTER_OBSPORT'] ?? '8888',
+        flavour: Platform.environment['OGURETS_FLUTTER_FLAVOUR'],
+        deviceId: Platform.environment['OGURETS_FLUTTER_DEVICE_ID'],
+        additionalArguments: Platform.environment['OGURETS_ADDITIONAL_ARGUMENTS']);
     await _handler.run();
     _port = await _handler.waitForObservatoryDebuggerUri();
     _log.info("application started, exposed observatory port $_port");

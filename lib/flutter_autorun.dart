@@ -19,6 +19,9 @@ class FlutterRunProcessHandler {
   static RegExp _noConnectedDeviceRegex =
       RegExp(r"no connected device", caseSensitive: false, multiLine: false);
 
+  static RegExp _usageRegex =
+    RegExp(r"Usage: flutter run \[arguments\]", caseSensitive: false, multiLine: false);
+
   static RegExp _finished =
       RegExp(r"Application (.*)\.", caseSensitive: false, multiLine: false);
 
@@ -27,12 +30,32 @@ class FlutterRunProcessHandler {
   List<StreamSubscription> _openSubscriptions = <StreamSubscription>[];
   final String _appTarget;
   final String _workingDirectory;
+  String deviceId;
+  String flavour;
+  String observatoryPort = '8888';
+  String additionalArguments;
 
-  FlutterRunProcessHandler(this._appTarget, this._workingDirectory);
+  FlutterRunProcessHandler(this._appTarget, this._workingDirectory, {this.flavour, this.deviceId, this.observatoryPort, this.additionalArguments});
 
   Future<void> run() async {
+    List<String> cmdLine = ["run", "--target=$_appTarget", "--observatory-port", observatoryPort];
+    
+    if (flavour != null) {
+      cmdLine.addAll(["--flavor", flavour]);
+    }
+    
+    if (deviceId != null) {
+      cmdLine.addAll(["-d", deviceId]);
+    }
+    
+    if (additionalArguments != null) {
+      cmdLine.addAll(split(additionalArguments));
+    }
+
+    _log.info("flutter ${cmdLine.join(' ')}");
+
     _runningProcess = await Process.start("flutter",
-        ["run", "--target=$_appTarget", "--observatory-port", "8888"],
+        cmdLine,
         workingDirectory: _workingDirectory, runInShell: true);
     _processStdoutStream =
         _runningProcess.stdout.transform(utf8.decoder).asBroadcastStream();
@@ -80,7 +103,7 @@ class FlutterRunProcessHandler {
     Timer timer;
 
     sub = _processStdoutStream.listen((logLine) {
-      // stdout.write(logLine);
+      stdout.write(">> ${logLine}");
       if (search.hasMatch(logLine)) {
         timer?.cancel();
         sub?.cancel();
@@ -94,6 +117,14 @@ class FlutterRunProcessHandler {
           stderr.writeln(failMessage);
           completer.completeError(
               new Exception("no device running to test against"));
+        }
+      } else if (_usageRegex.hasMatch(logLine)) {
+        timer?.cancel();
+        sub?.cancel();
+        if (!completer.isCompleted) {
+          stderr.writeln("${FAIL_COLOUR}Incorrect parameters for flutter run. Please check the command line above and resolve any issues.$RESET_COLOUR");
+          completer.completeError(
+              new Exception("incorrect parameters for flutter run."));
         }
       }
     }, cancelOnError: true);

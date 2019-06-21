@@ -13,9 +13,21 @@ to the beginning without having to quit and rerun the application
 
 in your `dev_dependencies` section in your `pubspec.yaml` include:
 
-`  ogurets_flutter: ^1.1.1`
+`  ogurets_flutter: ^1.2.1`
 
 or whichever is the higher version you see on this page.
+
+## environment variables
+
+If you wish to control the flutter run via your own command line build, then the important environment variables are
+the same as ogurets but with the extension of:
+
+- OGURETS_FLUTTER_FLAVOUR - this passes "--flavor ${OGURETS_FLUTTER_FLAVOUR}" to flutter run. Not the International
+English spelling.
+- OGURETS_FLUTTER_DEVICE_ID - this passes "-d ${OGURETS_FLUTTER_DEVICE_ID}" to flutter run letting you specify a device
+to run on.
+- OGURETS_ADDITIONAL_ARGUMENTS - lets you specify any arguments you wish. Arguments in quotes are broken up
+correctly. 
 
 ## notes
 

@@ -1,6 +1,6 @@
 name: ogurets_flutter
 description: Ogurets Support for Flutter.
-version: 1.1.2
+version: 1.2.1
 authors:
   - Irina Southwell <pishisuda11@gmail.com>
   - Richard Vowles <richard@bluetrainsoftware.com>
@@ -11,13 +11,12 @@ dependencies:
   flutter:
     sdk: flutter
   ogurets: ^3.1.1
+#  ogurets:
+#    path: ../ogurets
   flutter_driver:
     sdk: flutter
   logging: ^0.11.3+2
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
+  commandline_splitter: ^1.5.2
 
 dev_dependencies:
 
