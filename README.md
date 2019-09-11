@@ -27,7 +27,8 @@ English spelling.
 - OGURETS_FLUTTER_DEVICE_ID - this passes "-d ${OGURETS_FLUTTER_DEVICE_ID}" to flutter run letting you specify a device
 to run on.
 - OGURETS_ADDITIONAL_ARGUMENTS - lets you specify any arguments you wish. Arguments in quotes are broken up
-correctly. 
+correctly.
+- OGURETS_FLUTTER_START_TIMEOUT - lets you override the default 60 second timeout to wait for the application to start. 
 
 ## notes
 

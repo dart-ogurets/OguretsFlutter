@@ -1,6 +1,6 @@
 1.2.2
 =====
-More robust detection of failures.
+More robust detection of failures. Added OGURETS_FLUTTER_START_TIMEOUT.
 
 1.2.1
 =====
