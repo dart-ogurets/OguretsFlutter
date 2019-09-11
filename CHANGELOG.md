@@ -1,3 +1,7 @@
+1.2.2
+=====
+More robust detection of failures.
+
 1.2.1
 =====
 Added in support for additional parameters for flutter build runs (flavours, device ids and

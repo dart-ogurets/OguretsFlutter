@@ -17,37 +17,45 @@ class FlutterRunProcessHandler {
       multiLine: false);
 
   static RegExp _noConnectedDeviceRegex =
-      RegExp(r"no connected device", caseSensitive: false, multiLine: false);
+  RegExp(r"no connected device", caseSensitive: false, multiLine: false);
 
   static RegExp _usageRegex =
-    RegExp(r"Usage: flutter run \[arguments\]", caseSensitive: false, multiLine: false);
+  RegExp(r"Usage: flutter run \[arguments\]", caseSensitive: false, multiLine: false);
+
+  static RegExp _errorRegex =
+  RegExp(r"Gradle build aborted", caseSensitive: false, multiLine: false);
 
   static RegExp _finished =
-      RegExp(r"Application (.*)\.", caseSensitive: false, multiLine: false);
+  RegExp(r"Application (.*)\.", caseSensitive: false, multiLine: false);
 
   Process _runningProcess;
   Stream<String> _processStdoutStream;
-  List<StreamSubscription> _openSubscriptions = <StreamSubscription>[];
+  Stream<String> _processStderrStream;
+//  List<StreamSubscription> _openSubscriptions = <StreamSubscription>[];
   final String _appTarget;
   final String _workingDirectory;
   String deviceId;
   String flavour;
   String observatoryPort = '8888';
   String additionalArguments;
+  Duration timeout;
 
-  FlutterRunProcessHandler(this._appTarget, this._workingDirectory, {this.flavour, this.deviceId, this.observatoryPort, this.additionalArguments});
+  FlutterRunProcessHandler(this._appTarget, this._workingDirectory, {this.flavour, this.deviceId, this.observatoryPort, this.additionalArguments}) {
+    timeout = Duration(seconds: int.parse(Platform.environment['OGURETS_FLUTTER_START_TIMEOUT'] ?? '60'));
+    _log.info("Waiting for up to ${timeout.inSeconds}s for build and start");
+  }
 
   Future<void> run() async {
     List<String> cmdLine = ["run", "--target=$_appTarget", "--observatory-port", observatoryPort];
-    
+
     if (flavour != null) {
       cmdLine.addAll(["--flavor", flavour]);
     }
-    
+
     if (deviceId != null) {
       cmdLine.addAll(["-d", deviceId]);
     }
-    
+
     if (additionalArguments != null) {
       cmdLine.addAll(split(additionalArguments));
     }
@@ -59,11 +67,13 @@ class FlutterRunProcessHandler {
         workingDirectory: _workingDirectory, runInShell: true);
     _processStdoutStream =
         _runningProcess.stdout.transform(utf8.decoder).asBroadcastStream();
+    _processStderrStream =
+        _runningProcess.stderr.transform(utf8.decoder).asBroadcastStream();
 
-    _openSubscriptions.add(_runningProcess.stderr.listen((events) {
-      stderr.writeln(
-          "${FAIL_COLOUR}Flutter run error: ${String.fromCharCodes(events)}$RESET_COLOUR");
-    }));
+//    _openSubscriptions.add(_runningProcess.stderr.listen((events) {
+//      stderr.writeln(
+//          "${FAIL_COLOUR}Flutter run error: ${String.fromCharCodes(events)}$RESET_COLOUR");
+//    }));
   }
 
   // attempts to restart the running app
@@ -83,8 +93,8 @@ class FlutterRunProcessHandler {
     _ensureRunningProcess();
     if (_runningProcess != null) {
       _runningProcess.stdin.write("q");
-      _openSubscriptions.forEach((s) => s.cancel());
-      _openSubscriptions.clear();
+//      _openSubscriptions.forEach((s) => s.cancel());
+//      _openSubscriptions.clear();
       await waitForConsoleMessage(_finished, "Application not finished!!!", "");
       exitCode = await _runningProcess.exitCode;
       _runningProcess = null;
@@ -93,26 +103,44 @@ class FlutterRunProcessHandler {
     return exitCode;
   }
 
+  //
   Future<String> waitForConsoleMessage(
-      RegExp search, String timeoutException, String failMessage,
-      [Duration timeout = const Duration(seconds: 60)]) {
+      RegExp search, String timeoutException, String failMessage) {
+
     _ensureRunningProcess();
     final completer = Completer<String>();
-    StreamSubscription sub;
+    StreamSubscription stdoutSub;
+    StreamSubscription stderrSub;
 
     Timer timer;
 
-    sub = _processStdoutStream.listen((logLine) {
-      stdout.write(">> ${logLine}");
+    stderrSub = _processStderrStream.listen((logLine) {
+      stderr.write(">> $logLine");
+      if (_errorRegex.hasMatch(logLine)) {
+        timer?.cancel();
+        stdoutSub?.cancel();
+        stderrSub?.cancel();
+        if (!completer.isCompleted) {
+          stderr.writeln(failMessage);
+          completer.completeError(
+              new Exception("unknown startup failure"));
+        }
+      }
+    });
+
+    stdoutSub = _processStdoutStream.listen((logLine) {
+      stdout.write(">> $logLine");
       if (search.hasMatch(logLine)) {
         timer?.cancel();
-        sub?.cancel();
+        stdoutSub?.cancel();
+        stderrSub?.cancel();
         if (!completer.isCompleted) {
           completer.complete(search.firstMatch(logLine).group(1));
         }
       } else if (_noConnectedDeviceRegex.hasMatch(logLine)) {
         timer?.cancel();
-        sub?.cancel();
+        stdoutSub?.cancel();
+        stderrSub?.cancel();
         if (!completer.isCompleted) {
           stderr.writeln(failMessage);
           completer.completeError(
@@ -120,7 +148,8 @@ class FlutterRunProcessHandler {
         }
       } else if (_usageRegex.hasMatch(logLine)) {
         timer?.cancel();
-        sub?.cancel();
+        stdoutSub?.cancel();
+        stderrSub?.cancel();
         if (!completer.isCompleted) {
           stderr.writeln("${FAIL_COLOUR}Incorrect parameters for flutter run. Please check the command line above and resolve any issues.$RESET_COLOUR");
           completer.completeError(
@@ -130,7 +159,8 @@ class FlutterRunProcessHandler {
     }, cancelOnError: true);
 
     timer = new Timer(timeout, () {
-      sub?.cancel();
+      stdoutSub?.cancel();
+      stderrSub?.cancel();
       if (!completer.isCompleted) {
         stderr.writeln("timed out");
         completer.completeError(new Exception("timed out"));
@@ -140,8 +170,7 @@ class FlutterRunProcessHandler {
     return completer.future;
   }
 
-  Future<String> waitForObservatoryDebuggerUri(
-      [Duration timeout = const Duration(seconds: 60)]) {
+  Future<String> waitForObservatoryDebuggerUri() {
     return waitForConsoleMessage(
         _observatoryDebuggerUriRegex,
         "Timeout while wait for observatory debugger uri",
