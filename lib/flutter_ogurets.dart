@@ -50,6 +50,8 @@ class FlutterOgurets {
     _driver = await FlutterDriver.connect(dartVmServiceUrl: _port);
   }
 
+  bool get isAndroid => _handler != null && _handler.platform == DriverPlatform.android;
+
   void leaveRunning(bool l) {
     this._leaveRunning = l;
   }
@@ -123,14 +125,16 @@ class FlutterOgurets {
     return c.future;
   }
 
-  Future quitAndStart() async {
+  Future quit() async {
     // if we have an open driver, close it as a restart will kill it
     if (_driver != null) {
       await _driver.close();
     }
 
-    // now hit "R" on the currently running app
+    // now hit "Q" on the currently running app
     await _handler.terminate();
+    await _handler.restart();
+    _port = await _handler.waitForObservatoryDebuggerUri();
     var c = Completer();
 
     // now wait for 2 seconds and then reconnect - not waiting causes it to fail

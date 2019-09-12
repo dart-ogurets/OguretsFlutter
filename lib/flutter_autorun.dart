@@ -2,6 +2,10 @@ part of ogurets_flutter;
 
 // this is taken from the gherkin package and then modified. https://github.com/jonsamwell/dart_gherkin
 
+enum DriverPlatform {
+  android, ios
+}
+
 class FlutterRunProcessHandler {
   static const String FAIL_COLOUR = "\u001b[33;31m"; // red
   static const String RESET_COLOUR = "\u001b[33;0m";
@@ -28,10 +32,13 @@ class FlutterRunProcessHandler {
   static RegExp _finished =
   RegExp(r"Application (.*)\.", caseSensitive: false, multiLine: false);
 
+  static RegExp _androidPlatform =
+  RegExp(r"Gradle", caseSensitive: true, multiLine: false);
+
   Process _runningProcess;
   Stream<String> _processStdoutStream;
   Stream<String> _processStderrStream;
-//  List<StreamSubscription> _openSubscriptions = <StreamSubscription>[];
+  List<StreamSubscription> _openSubscriptions = <StreamSubscription>[];
   final String _appTarget;
   final String _workingDirectory;
   String deviceId;
@@ -39,14 +46,19 @@ class FlutterRunProcessHandler {
   String observatoryPort = '8888';
   String additionalArguments;
   Duration timeout;
+  List<String> cmdLine;
+  DriverPlatform _platform = DriverPlatform.ios;
 
   FlutterRunProcessHandler(this._appTarget, this._workingDirectory, {this.flavour, this.deviceId, this.observatoryPort, this.additionalArguments}) {
+
     timeout = Duration(seconds: int.parse(Platform.environment['OGURETS_FLUTTER_START_TIMEOUT'] ?? '60'));
     _log.info("Waiting for up to ${timeout.inSeconds}s for build and start");
   }
 
+  DriverPlatform get platform => _platform;
+
   Future<void> run() async {
-    List<String> cmdLine = ["run", "--target=$_appTarget", "--observatory-port", observatoryPort];
+    cmdLine = ["run", "--target=$_appTarget", "--observatory-port", observatoryPort];
 
     if (flavour != null) {
       cmdLine.addAll(["--flavor", flavour]);
@@ -60,6 +72,10 @@ class FlutterRunProcessHandler {
       cmdLine.addAll(split(additionalArguments));
     }
 
+    await startApp();
+  }
+
+  Future startApp() async {
     _log.info("flutter ${cmdLine.join(' ')}");
 
     _runningProcess = await Process.start("flutter",
@@ -70,10 +86,13 @@ class FlutterRunProcessHandler {
     _processStderrStream =
         _runningProcess.stderr.transform(utf8.decoder).asBroadcastStream();
 
-//    _openSubscriptions.add(_runningProcess.stderr.listen((events) {
-//      stderr.writeln(
-//          "${FAIL_COLOUR}Flutter run error: ${String.fromCharCodes(events)}$RESET_COLOUR");
-//    }));
+    _openSubscriptions.add(_processStdoutStream.listen((data) {
+      stdout.writeln(">> " + data);
+    }));
+    _openSubscriptions.add(_processStderrStream.listen((events) {
+      stderr.writeln(
+          ">> ${FAIL_COLOUR}Flutter run error: ${events}$RESET_COLOUR");
+    }));
   }
 
   // attempts to restart the running app
@@ -84,6 +103,8 @@ class FlutterRunProcessHandler {
           _restartedApplicationSuccess,
           "Timeout waiting for app restart",
           "${FAIL_COLOUR}No connected devices found to run app on and tests against$RESET_COLOUR");
+    } else {
+      return startApp();
     }
   }
 
@@ -93,9 +114,9 @@ class FlutterRunProcessHandler {
     _ensureRunningProcess();
     if (_runningProcess != null) {
       _runningProcess.stdin.write("q");
-//      _openSubscriptions.forEach((s) => s.cancel());
-//      _openSubscriptions.clear();
       await waitForConsoleMessage(_finished, "Application not finished!!!", "");
+      _openSubscriptions.forEach((s) => s.cancel());
+      _openSubscriptions.clear();
       exitCode = await _runningProcess.exitCode;
       _runningProcess = null;
     }
@@ -115,7 +136,6 @@ class FlutterRunProcessHandler {
     Timer timer;
 
     stderrSub = _processStderrStream.listen((logLine) {
-      stderr.write(">> $logLine");
       if (_errorRegex.hasMatch(logLine)) {
         timer?.cancel();
         stdoutSub?.cancel();
@@ -129,7 +149,10 @@ class FlutterRunProcessHandler {
     });
 
     stdoutSub = _processStdoutStream.listen((logLine) {
-      stdout.write(">> $logLine");
+      if (_androidPlatform.hasMatch(logLine)) {
+        _platform = DriverPlatform.android;
+      }
+
       if (search.hasMatch(logLine)) {
         timer?.cancel();
         stdoutSub?.cancel();

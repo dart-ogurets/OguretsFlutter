@@ -17,6 +17,13 @@ class FlutterHooks {
     world.resetOverride(false);
   }
 
+  @After(tag: 'AndroidQuit', order: 999)
+  void androidQuit() async {
+    if (world.isAndroid) {
+      await world.quit();
+    }
+  }
+
   // this won't do anything if the app wasn't started by us, the default
   // is not to restart or the NoFlutterRestart tag has been added
   @Before(order: -99)
