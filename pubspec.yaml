@@ -10,9 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  ogurets: ^3.1.1
-#  ogurets:
-#    path: ../ogurets
+#  ogurets: ^3.1.1
+  ogurets:
+    path: ../Ogurets
   flutter_driver:
     sdk: flutter
   logging: ^0.11.3+2
