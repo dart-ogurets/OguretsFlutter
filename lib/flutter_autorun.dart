@@ -143,7 +143,7 @@ class FlutterRunProcessHandler {
         if (!completer.isCompleted) {
           stderr.writeln(failMessage);
           completer.completeError(
-              new Exception("unknown startup failure"));
+              Exception("unknown startup failure"));
         }
       }
     });
@@ -167,7 +167,7 @@ class FlutterRunProcessHandler {
         if (!completer.isCompleted) {
           stderr.writeln(failMessage);
           completer.completeError(
-              new Exception("no device running to test against"));
+              Exception("no device running to test against"));
         }
       } else if (_usageRegex.hasMatch(logLine)) {
         timer?.cancel();
@@ -176,17 +176,17 @@ class FlutterRunProcessHandler {
         if (!completer.isCompleted) {
           stderr.writeln("${FAIL_COLOUR}Incorrect parameters for flutter run. Please check the command line above and resolve any issues.$RESET_COLOUR");
           completer.completeError(
-              new Exception("incorrect parameters for flutter run."));
+              Exception("incorrect parameters for flutter run."));
         }
       }
     }, cancelOnError: true);
 
-    timer = new Timer(timeout, () {
+    timer = Timer(timeout, () {
       stdoutSub?.cancel();
       stderrSub?.cancel();
       if (!completer.isCompleted) {
         stderr.writeln("timed out");
-        completer.completeError(new Exception("timed out"));
+        completer.completeError(Exception("timed out"));
       }
     });
 

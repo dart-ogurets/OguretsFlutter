@@ -1,6 +1,6 @@
 part of ogurets_flutter;
 
-final Logger _log = new Logger('ogurets_flutter');
+final Logger _log = Logger('ogurets_flutter');
 
 /// This just follows the traditional world pattern
 class FlutterOgurets {

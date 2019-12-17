@@ -1,3 +1,9 @@
+1.2.3
+=====
+- Support for screen snapshotting
+- doesn't reset the app on first run
+
+
 1.2.2
 =====
 More robust detection of failures. Added OGURETS_FLUTTER_START_TIMEOUT.

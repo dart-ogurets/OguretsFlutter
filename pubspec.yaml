@@ -1,6 +1,6 @@
 name: ogurets_flutter
 description: Ogurets Support for Flutter.
-version: 1.2.2
+version: 1.2.3
 authors:
   - Irina Southwell <pishisuda11@gmail.com>
   - Richard Vowles <richard@bluetrainsoftware.com>
@@ -11,12 +11,13 @@ dependencies:
   flutter:
     sdk: flutter
   ogurets: ^3.1.1
-#  ogurets:
-#    path: ../Ogurets
   flutter_driver:
     sdk: flutter
   logging: ^0.11.3+2
   commandline_splitter: ^1.5.2
+
+dev_dependencies:
+  pedantic: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec

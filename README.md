@@ -45,6 +45,26 @@ Port and set it in an environment variable: `VM_SERVICE_URL`. If *ogurets_flutte
 simply use it, but restart functionality will be turned off. Only use this when testing scenario by scenario and
 you are writing and changing code and restarting the app yourself or where the state isn't important.
  
+### Screenshots
+
+*ogurets_flutter* can take screenshots for you - if you tag your test with XX and ensure the environment variable
+SCREENSHOT_DIR has been set, then we will take screenshots after every step and once the scenario ends.
+
+### Debugging
+
+If you wish to run and debug your Flutter app as a separate process from your Ogurets run, you need to follow the 
+below steps:
+
+- create a new run profile that points to your "main" used in your Flutter Driver tests. Then add in the Additional
+Arguments to this run configuration `--observatory-port 8888` (or chose some other port).
+- start the application and look for the line when the build spits out: `Observatory URL on this device: http://127.0.0.1/XXXX`,
+e.g. ![Observatory URL](images/observatory_url.png)
+- open your test run configuration and you will see a field called Observatory URL - paste this link in there. If this
+is in place when the IDE runs, it will not attempt to run the Flutter app, simply connect to it. From the command line,
+this is done using the environment variable `VM_SERVICE_URL`.
+
+At this point you can now operate in normal Flutter development mode, changing code, adding widget tags, debug points
+and so forth, and re-running your tests again and again as necessary.
 
 ## authors
 

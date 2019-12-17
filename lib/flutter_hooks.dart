@@ -2,6 +2,7 @@ part of ogurets_flutter;
 
 class FlutterHooks {
   final FlutterOgurets world;
+  bool started = false;
 
   FlutterHooks(this.world);
 
@@ -28,6 +29,32 @@ class FlutterHooks {
   // is not to restart or the NoFlutterRestart tag has been added
   @Before(order: -99)
   Future attemptRestart() async {
-    await world.restart();
+    if (started) {
+      await world.restart();
+    }
+    
+    started = true;
+  }
+
+  @BeforeStep(tag: 'FlutterScreenshot')
+  void beforeStepScreenshot(ScenarioStatus instanceScenario) async {
+    await takescreenshot(instanceScenario);
+  }
+
+  @After(tag: 'FlutterScreenshot')
+  void afterScenarioScreenshot(ScenarioStatus instanceScenario) async {
+    await takescreenshot(instanceScenario);
+  }
+
+  Future takescreenshot(ScenarioStatus instanceScenario) async {
+    String dir = Platform.environment['SCREENSHOT_DIR'];
+    if (dir != null) {
+      // ensure directory exists
+      await Directory(dir).create(recursive: true);
+      // filename is scenario name + timestamp
+      String filename = dir + "/" + instanceScenario.scenario.name + "-" + DateTime.now().millisecondsSinceEpoch.toString() + ".jpg";
+      final bytes = await world.driver.screenshot();
+      await File(filename).writeAsBytes(bytes, flush: true);
+    }
   }
 }
