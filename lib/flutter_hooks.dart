@@ -57,4 +57,5 @@ class FlutterHooks {
       await File(filename).writeAsBytes(bytes, flush: true);
     }
   }
+
 }

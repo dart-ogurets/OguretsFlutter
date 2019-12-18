@@ -47,8 +47,24 @@ you are writing and changing code and restarting the app yourself or where the s
  
 ### Screenshots
 
-*ogurets_flutter* can take screenshots for you - if you tag your test with XX and ensure the environment variable
-SCREENSHOT_DIR has been set, then we will take screenshots after every step and once the scenario ends.
+*ogurets_flutter* can take screenshots for you if you are having difficulty in specific environments or if you just
+ wish to capture specific screenshots at a particular scale. 
+
+For when you want to determine what is going on, particularly in a headless test environment, if you tag your test with 
+`@FlutterScreenshot` and ensure the environment variable `SCREENSHOT_DIR` has been set, then we will take screenshots _before_ 
+every step and once the scenario ends. All screenshots are time stamped and put in the directory you have specified
+with the `SCREENSHOT_DIR` variable. Any missing directories in this list will be created as part of the test.
+
+If you wish to capture screenshots with a specific name, then there is a step for this - and it's intended use is
+to capture screenshots for "whats new" screens or for when you are uploading your application to the stores. For this there
+are 3 available steps to control this:
+
+- I take a screenshot called {string}
+- I set the maximum screenshot height to {int}
+- I set the maximum screenshot width to {int}
+
+Furthermore, if you have an extra environment variable called SCREENSHOT_PLATFORM you can easily change the platform
+between each run of your Cucumber tests and capture different platforms (such as the four recommended for iOS). 
 
 ### Debugging
 
