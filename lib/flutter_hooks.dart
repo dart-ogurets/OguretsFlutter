@@ -2,7 +2,6 @@ part of ogurets_flutter;
 
 class FlutterHooks {
   final FlutterOgurets world;
-  bool started = false;
 
   FlutterHooks(this.world);
 
@@ -29,11 +28,12 @@ class FlutterHooks {
   // is not to restart or the NoFlutterRestart tag has been added
   @Before(order: -99)
   Future attemptRestart() async {
-    if (started) {
+    if (world.started) {
+      print("restarting app");
       await world.restart();
     }
     
-    started = true;
+    world.started = true;
   }
 
   @BeforeStep(tag: 'FlutterScreenshot')

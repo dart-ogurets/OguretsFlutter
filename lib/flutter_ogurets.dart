@@ -7,6 +7,7 @@ class FlutterOgurets {
   String _port;
   FlutterDriver _driver;
   FlutterRunProcessHandler _handler;
+  bool started = false;
   bool _leaveRunning = false;
   bool _resetByDefault = true;
   bool _resetOverride;
