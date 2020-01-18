@@ -2,9 +2,7 @@ part of ogurets_flutter;
 
 // this is taken from the gherkin package and then modified. https://github.com/jonsamwell/dart_gherkin
 
-enum DriverPlatform {
-  android, ios
-}
+enum DriverPlatform { android, ios }
 
 class FlutterRunProcessHandler {
   static const String FAIL_COLOUR = "\u001b[33;31m"; // red
@@ -21,19 +19,19 @@ class FlutterRunProcessHandler {
       multiLine: false);
 
   static RegExp _noConnectedDeviceRegex =
-  RegExp(r"no connected device", caseSensitive: false, multiLine: false);
+      RegExp(r"no connected device", caseSensitive: false, multiLine: false);
 
-  static RegExp _usageRegex =
-  RegExp(r"Usage: flutter run \[arguments\]", caseSensitive: false, multiLine: false);
+  static RegExp _usageRegex = RegExp(r"Usage: flutter run \[arguments\]",
+      caseSensitive: false, multiLine: false);
 
   static RegExp _errorRegex =
-  RegExp(r"Gradle build aborted", caseSensitive: false, multiLine: false);
+      RegExp(r"Gradle build aborted", caseSensitive: false, multiLine: false);
 
   static RegExp _finished =
-  RegExp(r"Application (.*)\.", caseSensitive: false, multiLine: false);
+      RegExp(r"Application (.*)\.", caseSensitive: false, multiLine: false);
 
   static RegExp _androidPlatform =
-  RegExp(r"Gradle", caseSensitive: true, multiLine: false);
+      RegExp(r"Gradle", caseSensitive: true, multiLine: false);
 
   Process _runningProcess;
   Stream<String> _processStdoutStream;
@@ -49,16 +47,26 @@ class FlutterRunProcessHandler {
   List<String> cmdLine;
   DriverPlatform _platform = DriverPlatform.ios;
 
-  FlutterRunProcessHandler(this._appTarget, this._workingDirectory, {this.flavour, this.deviceId, this.observatoryPort, this.additionalArguments}) {
-
-    timeout = Duration(seconds: int.parse(Platform.environment['OGURETS_FLUTTER_START_TIMEOUT'] ?? '60'));
+  FlutterRunProcessHandler(this._appTarget, this._workingDirectory,
+      {this.flavour,
+      this.deviceId,
+      this.observatoryPort,
+      this.additionalArguments}) {
+    timeout = Duration(
+        seconds: int.parse(
+            Platform.environment['OGURETS_FLUTTER_START_TIMEOUT'] ?? '60'));
     _log.info("Waiting for up to ${timeout.inSeconds}s for build and start");
   }
 
   DriverPlatform get platform => _platform;
 
   Future<void> run() async {
-    cmdLine = ["run", "--target=$_appTarget", "--observatory-port", observatoryPort];
+    cmdLine = [
+      "run",
+      "--target=$_appTarget",
+      "--observatory-port",
+      observatoryPort
+    ];
 
     if (flavour != null) {
       cmdLine.addAll(["--flavor", flavour]);
@@ -78,8 +86,7 @@ class FlutterRunProcessHandler {
   Future startApp() async {
     _log.info("flutter ${cmdLine.join(' ')}");
 
-    _runningProcess = await Process.start("flutter",
-        cmdLine,
+    _runningProcess = await Process.start("flutter", cmdLine,
         workingDirectory: _workingDirectory, runInShell: true);
     _processStdoutStream =
         _runningProcess.stdout.transform(utf8.decoder).asBroadcastStream();
@@ -90,8 +97,8 @@ class FlutterRunProcessHandler {
       stdout.writeln(">> " + data);
     }));
     _openSubscriptions.add(_processStderrStream.listen((events) {
-      stderr.writeln(
-          ">> ${FAIL_COLOUR}Flutter run error: ${events}$RESET_COLOUR");
+      stderr
+          .writeln(">> ${FAIL_COLOUR}Flutter run error: $events$RESET_COLOUR");
     }));
   }
 
@@ -127,7 +134,6 @@ class FlutterRunProcessHandler {
   //
   Future<String> waitForConsoleMessage(
       RegExp search, String timeoutException, String failMessage) {
-
     _ensureRunningProcess();
     final completer = Completer<String>();
     StreamSubscription stdoutSub;
@@ -142,8 +148,7 @@ class FlutterRunProcessHandler {
         stderrSub?.cancel();
         if (!completer.isCompleted) {
           stderr.writeln(failMessage);
-          completer.completeError(
-              Exception("unknown startup failure"));
+          completer.completeError(Exception("unknown startup failure"));
         }
       }
     });
@@ -166,15 +171,16 @@ class FlutterRunProcessHandler {
         stderrSub?.cancel();
         if (!completer.isCompleted) {
           stderr.writeln(failMessage);
-          completer.completeError(
-              Exception("no device running to test against"));
+          completer
+              .completeError(Exception("no device running to test against"));
         }
       } else if (_usageRegex.hasMatch(logLine)) {
         timer?.cancel();
         stdoutSub?.cancel();
         stderrSub?.cancel();
         if (!completer.isCompleted) {
-          stderr.writeln("${FAIL_COLOUR}Incorrect parameters for flutter run. Please check the command line above and resolve any issues.$RESET_COLOUR");
+          stderr.writeln(
+              "${FAIL_COLOUR}Incorrect parameters for flutter run. Please check the command line above and resolve any issues.$RESET_COLOUR");
           completer.completeError(
               Exception("incorrect parameters for flutter run."));
         }

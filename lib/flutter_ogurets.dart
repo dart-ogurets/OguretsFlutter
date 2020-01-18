@@ -30,7 +30,8 @@ class FlutterOgurets {
       var runApp = _targetApp;
       // run the app and get its port no. This also allows restart to work.
       if (runApp == null) {
-        var app = Platform.environment['OGURETS_FLUTTER_APP'] ?? Platform.script.toFilePath();
+        var app = Platform.environment['OGURETS_FLUTTER_APP'] ??
+            Platform.script.toFilePath();
         // standard integration tests (the only type that will use Flutter World)
         // use X_test.dart (test runner) and X.dart (app runner)
         if (app.endsWith("_test.dart")) {
@@ -39,7 +40,8 @@ class FlutterOgurets {
       }
 
       if (runApp == null) {
-        throw Exception("Cannot determine how to run or connect to the application.");
+        throw Exception(
+            "Cannot determine how to run or connect to the application.");
       }
 
       _log.info("Waiting for application to start and expose port.");
@@ -51,7 +53,8 @@ class FlutterOgurets {
     _driver = await FlutterDriver.connect(dartVmServiceUrl: _port);
   }
 
-  bool get isAndroid => _handler != null && _handler.platform == DriverPlatform.android;
+  bool get isAndroid =>
+      _handler != null && _handler.platform == DriverPlatform.android;
 
   void leaveRunning(bool l) {
     this._leaveRunning = l;
@@ -79,12 +82,14 @@ class FlutterOgurets {
   }
 
   Future _run(String runApp) async {
-    _handler = FlutterRunProcessHandler(runApp,
-        Platform.environment['OGURETS_FLUTTER_WORKDIR'] ?? '.',
-        observatoryPort: Platform.environment['OGURETS_FLUTTER_OBSPORT'] ?? '8888',
+    _handler = FlutterRunProcessHandler(
+        runApp, Platform.environment['OGURETS_FLUTTER_WORKDIR'] ?? '.',
+        observatoryPort:
+            Platform.environment['OGURETS_FLUTTER_OBSPORT'] ?? '8888',
         flavour: Platform.environment['OGURETS_FLUTTER_FLAVOUR'],
         deviceId: Platform.environment['OGURETS_FLUTTER_DEVICE_ID'],
-        additionalArguments: Platform.environment['OGURETS_ADDITIONAL_ARGUMENTS']);
+        additionalArguments:
+            Platform.environment['OGURETS_ADDITIONAL_ARGUMENTS']);
     await _handler.run();
     _port = await _handler.waitForObservatoryDebuggerUri();
     _log.info("application started, exposed observatory port $_port");

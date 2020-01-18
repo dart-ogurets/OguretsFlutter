@@ -1,8 +1,11 @@
 name: ogurets_flutter
-description: Ogurets Support for Flutter.
-version: 1.2.3
+description:
+  This package extends the Ogurets package to allow to support Flutter. It brings in a slew of hooks
+  desiged to add functionality around starting, restarting, taking screenshots and so forth. You need
+  to use Ogurets as well as this package.
+version: 1.2.5
 authors:
-  - Irina Southwell <pishisuda11@gmail.com>
+  - Irina Southwell <irinasouthwell@gmail.com>
   - Richard Vowles <richard@bluetrainsoftware.com>
 homepage: https://github.com/dart-ogurets/OguretsFlutter
 environment:
@@ -17,7 +20,7 @@ dependencies:
     sdk: flutter
   logging: ^0.11.3+2
   commandline_splitter: ^1.5.2
-  image: ^2.1.10
+  image: ^2.1.4
 
 dev_dependencies:
   pedantic: any

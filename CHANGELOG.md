@@ -1,3 +1,11 @@
+1.2.5
+=====
+- documentation
+
+1.2.4
+=====
+- last minute discovery that flutter driver sdk depends on lower version of image lib
+
 1.2.3
 =====
 - Support for screen snapshotting
