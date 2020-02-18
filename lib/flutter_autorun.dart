@@ -77,7 +77,7 @@ class FlutterRunProcessHandler {
     }
 
     if (additionalArguments != null) {
-      cmdLine.addAll(split(additionalArguments));
+      cmdLine.addAll(_splitArgs(additionalArguments));
     }
 
     await startApp();
@@ -100,6 +100,14 @@ class FlutterRunProcessHandler {
       stderr
           .writeln(">> ${FAIL_COLOUR}Flutter run error: $events$RESET_COLOUR");
     }));
+
+    // Get the exit code of flutter run and stop if there is an error so we don't have to wait for the timeout
+    var exitCode = await _runningProcess.exitCode;
+
+    if(exitCode != 0)
+    {
+      exit(exitCode);
+    }
   }
 
   // attempts to restart the running app
@@ -211,5 +219,66 @@ class FlutterRunProcessHandler {
       throw Exception(
           "FlutterRunProcessHandler: flutter run process is not active");
     }
+  }
+
+  ///Port of translateCommandline https://commons.apache.org/proper/commons-exec/apidocs/src-html/org/apache/commons/exec/CommandLine.html
+  List<String> _splitArgs(String line) {
+    line = line.trimLeft();
+
+    var args = <String>[];
+
+    int pos = -1;
+    StringBuffer current = StringBuffer();
+    const int normal = 0;
+    const int inSingleQuote = 1;
+    const int inDoubleQuote = 2;
+    int state = normal;
+    bool lastQuoted = false;
+
+    while (pos < line.length - 1) {
+      var next = line[pos + 1];
+
+      switch (state) {
+        case inSingleQuote:
+          if (next == '\'') {
+            lastQuoted = true;
+            state = normal;
+          } else {
+            current.write(next);
+          }
+          break;
+        case inDoubleQuote:
+          if (next == '\"') {
+            lastQuoted = true;
+            state = normal;
+          } else {
+            current.write(next);
+          }
+          break;
+        default:
+          if (next == '\'') {
+            state = inSingleQuote;
+          } else if (next == '\"') {
+            state = inDoubleQuote;
+          } else if (next == ' ') {
+            if (lastQuoted || current.isNotEmpty) {
+              args.add(current.toString());
+              current.clear();
+            }
+          } else {
+            current.write(next);
+          }
+          lastQuoted = false;
+          break;
+      }
+
+      pos++;
+    }
+
+    if (lastQuoted || current.isNotEmpty) {
+      args.add(current.toString());
+    }
+
+    return args;
   }
 }
