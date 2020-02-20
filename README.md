@@ -63,6 +63,29 @@ class CounterStepdefs {
 }
 ```
 
+### vscode
+
+If you are using Visual Studio Code, you can debug the tests by adding a section like the following to your `launch.json`.  This is for the example solution in the repository.
+
+```json
+{
+            //Can't run this with the normal working directory because the Dart plugin helpfully tries to launch Flutter, and we 
+            //want to run it as dart. 
+            "name": "Debug E2E Tests",
+            "request": "launch",
+            "type": "dart",
+            "program": "ogurets_flutter_test.dart",
+            "cwd": "example/test_driver",
+            "env": {"OGURETS_FLUTTER_WORKDIR":"..", "OGURETS_FLUTTER_START_TIMEOUT":"120", "OGURETS_ADDITIONAL_ARGUMENTS":""},
+          }
+```
+The `ogurets_flutter_test.dart` file would have to be modified to look for features in that directory as well, since the launch configuration changes the cwd so that tests can be debugged.  Otherwise, the Dart Code plugin attempts to launch as a Flutter rather than Dart debugger.
+
+```dart
+    ..feature('test_driver/features/counter.feature')
+    ..feature('features')
+```
+
 ## environment variables
 
 If you wish to control the flutter run via your own command line build, then the important environment variables are
