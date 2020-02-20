@@ -60,6 +60,7 @@ class FlutterRunProcessHandler {
 
   DriverPlatform get platform => _platform;
 
+  /// builds the command line arguments for flutter run and calls startApp()
   Future<void> run() async {
     cmdLine = [
       "run",
@@ -83,6 +84,8 @@ class FlutterRunProcessHandler {
     await startApp();
   }
 
+  /// Calls flutter run with any additional arguments. Do not await anything that is not a critical error, or the tests
+  /// will not execute because it will wait for the process to exit.
   Future startApp() async {
     _log.info("flutter ${cmdLine.join(' ')}");
 
@@ -96,18 +99,13 @@ class FlutterRunProcessHandler {
     _openSubscriptions.add(_processStdoutStream.listen((data) {
       stdout.writeln(">> " + data);
     }));
-    _openSubscriptions.add(_processStderrStream.listen((events) {
+    _openSubscriptions.add(_processStderrStream.listen((events) async {
       stderr
           .writeln(">> ${FAIL_COLOUR}Flutter run error: $events$RESET_COLOUR");
+           // Get the exit code of flutter run and stop if there is an error so we don't have to wait for the timeout
+          exit(await _runningProcess.exitCode);
     }));
-
-    // Get the exit code of flutter run and stop if there is an error so we don't have to wait for the timeout
-    var exitCode = await _runningProcess.exitCode;
-
-    if(exitCode != 0)
-    {
-      exit(exitCode);
-    }
+    
   }
 
   // attempts to restart the running app
@@ -123,6 +121,7 @@ class FlutterRunProcessHandler {
     }
   }
 
+  /// close the running app
   Future<int> terminate() async {
     print("closing app.");
     int exitCode = -1;
@@ -139,7 +138,7 @@ class FlutterRunProcessHandler {
     return exitCode;
   }
 
-  //
+  /// wait for a specific message to appear in the console
   Future<String> waitForConsoleMessage(
       RegExp search, String timeoutException, String failMessage) {
     _ensureRunningProcess();
@@ -207,6 +206,7 @@ class FlutterRunProcessHandler {
     return completer.future;
   }
 
+  /// wait for the debugger uri - appears after flutter run has started
   Future<String> waitForObservatoryDebuggerUri() {
     return waitForConsoleMessage(
         _observatoryDebuggerUriRegex,
@@ -214,6 +214,7 @@ class FlutterRunProcessHandler {
         "${FAIL_COLOUR}No connected devices found to run app on and tests against$RESET_COLOUR");
   }
 
+  /// make sure flutter run is executing - _runningProcess is set by startApp()
   void _ensureRunningProcess() {
     if (_runningProcess == null) {
       throw Exception(
@@ -221,7 +222,7 @@ class FlutterRunProcessHandler {
     }
   }
 
-  ///Port of translateCommandline https://commons.apache.org/proper/commons-exec/apidocs/src-html/org/apache/commons/exec/CommandLine.html
+  /// port of translateCommandline https://commons.apache.org/proper/commons-exec/apidocs/src-html/org/apache/commons/exec/CommandLine.html
   List<String> _splitArgs(String line) {
     line = line.trimLeft();
 
