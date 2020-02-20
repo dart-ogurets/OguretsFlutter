@@ -67,7 +67,7 @@ class CounterStepdefs {
 
 If you are using Visual Studio Code, you can debug the tests by adding a section like the following to your `launch.json`.  This is for the example solution in the repository.
 
-```json
+```jsonc
 {
             //Can't run this with the normal working directory because the Dart plugin helpfully tries to launch Flutter, and we 
             //want to run it as dart. 
