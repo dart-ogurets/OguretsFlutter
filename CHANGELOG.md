@@ -1,3 +1,7 @@
+1.2.7
+====
+- fixes some issues introduced from the previous build
+
 1.2.6
 =====
 - updated method of adding in flutter extra run parameters as the command line library was chopping them off (tobindh@github.com)

@@ -3,7 +3,7 @@ description:
   This package extends the Ogurets package to allow to support Flutter. It brings in hooks
   desiged to add functionality around starting, restarting, taking screenshots, etc. You need
   to use Ogurets as well as this package.
-version: 1.2.6
+version: 1.2.7
 authors:
   - Irina Southwell <irinasouthwell@gmail.com>
   - Richard Vowles <richard@bluetrainsoftware.com>
