@@ -105,14 +105,7 @@ class FlutterRunProcessHandler {
            // Get the exit code of flutter run and stop if there is an error so we don't have to wait for the timeout
           exit(await _runningProcess.exitCode);
     }));
-
-    // Get the exit code of flutter run and stop if there is an error so we don't have to wait for the timeout
-    var exitCode = await _runningProcess.exitCode;
-
-    if(exitCode != 0)
-    {
-      exit(exitCode);
-    }
+    
   }
 
   // attempts to restart the running app
