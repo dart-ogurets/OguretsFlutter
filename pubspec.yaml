@@ -1,8 +1,6 @@
 name: ogurets_flutter
 description:
-  This package extends the Ogurets package to allow to support Flutter. It brings in hooks
-  desiged to add functionality around starting, restarting, taking screenshots, etc. You need
-  to use Ogurets as well as this package.
+  This package extends the Cucumber based Ogurets package to allow to support Flutter.
 version: 1.2.7
 authors:
   - Irina Southwell <irinasouthwell@gmail.com>
