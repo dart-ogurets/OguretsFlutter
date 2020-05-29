@@ -23,8 +23,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  ogurets_flutter:
-    path: ..
+  ogurets_flutter: 1.2.7
+#    path: ..
   ogurets: ^3.1.6
 
 
