@@ -164,7 +164,6 @@ and so forth, and re-running your tests again and again as necessary.
 
 ## authors
 
-- _Irina Southwell (nee Капрельянц Ирина)_, Principal Engineer (https://www.linkedin.com/in/irina-southwell-9727a422/)
 - _Richard Vowles_, Software Developer (https://www.linkedin.com/in/richard-vowles-72035193/)
 
 We also thank Jon Samwell of _Flutter Gherkin_ for his idea (and core code) for managing the run of the the application. It has been
