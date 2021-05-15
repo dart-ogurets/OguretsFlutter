@@ -1,13 +1,13 @@
 name: ogurets_flutter
 description:
   This package extends the Cucumber based Ogurets package to allow to support Flutter.
-version: 1.2.7
+version: 2.0.0
 authors:
   - Irina Southwell <irinasouthwell@gmail.com>
   - Richard Vowles <richard@bluetrainsoftware.com>
 homepage: https://github.com/dart-ogurets/OguretsFlutter
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 dependencies:
   flutter:
     sdk: flutter
