@@ -1,3 +1,7 @@
+2.0.0
+=====
+- move to nullsafe thanks to @nightscape
+
 1.2.7
 ====
 - fixes some issues introduced from the previous build
