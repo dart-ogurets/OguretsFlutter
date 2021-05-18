@@ -13,15 +13,15 @@ class FlutterOguretsHelperStepdefs {
 
   @And(r'I take a screenshot called {string}')
   void takeNamedScreenshot(String shotname) async {
-    String dir = Platform.environment['SCREENSHOT_DIR'];
-    String platformName = Platform.environment['SCREENSHOT_PLATFORM'];
+    var dir = Platform.environment['SCREENSHOT_DIR'];
+    var platformName = Platform.environment['SCREENSHOT_PLATFORM'];
     if (dir != null) {
       String fullDir = platformName != null ? '$dir/$platformName' : dir;
       // ensure directory exists
       await Directory(fullDir).create(recursive: true);
       // filename is scenario name + timestamp
       String filename = "$fullDir/$shotname.jpg";
-      final bytes = await _world.driver.screenshot();
+      final bytes = await _world!.driver!.screenshot();
 
       if (_state.maxWidth != null || _state.maxHeight != null) {
         Image src = decodeImage(bytes);
@@ -46,6 +46,6 @@ class FlutterOguretsHelperStepdefs {
 }
 
 class FlutterOguretsScreenshotHelperState {
-  int maxWidth;
-  int maxHeight;
+  int? maxWidth;
+  int? maxHeight;
 }

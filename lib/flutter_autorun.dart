@@ -33,28 +33,28 @@ class FlutterRunProcessHandler {
   static RegExp _androidPlatform =
       RegExp(r"Gradle", caseSensitive: true, multiLine: false);
 
-  Process _runningProcess;
-  Stream<String> _processStdoutStream;
-  Stream<String> _processStderrStream;
+  Process? _runningProcess;
+  late Stream<String> _processStdoutStream;
+  late Stream<String> _processStderrStream;
   List<StreamSubscription> _openSubscriptions = <StreamSubscription>[];
   final String _appTarget;
   final String _workingDirectory;
-  String deviceId;
-  String flavour;
-  String observatoryPort = '8888';
+  String? deviceId;
+  String? flavour;
+  String observatoryPort;
   String additionalArguments;
-  Duration timeout;
-  List<String> cmdLine;
+  Duration timeout = Duration(
+      seconds: int.parse(
+          Platform.environment['OGURETS_FLUTTER_START_TIMEOUT'] ?? '60'));
+  late final List<String> cmdLine;
   DriverPlatform _platform = DriverPlatform.ios;
 
   FlutterRunProcessHandler(this._appTarget, this._workingDirectory,
       {this.flavour,
       this.deviceId,
-      this.observatoryPort,
-      this.additionalArguments}) {
-    timeout = Duration(
-        seconds: int.parse(
-            Platform.environment['OGURETS_FLUTTER_START_TIMEOUT'] ?? '60'));
+      this.observatoryPort = '8888',
+      this.additionalArguments = ''
+      }) {
     _log.info("Waiting for up to ${timeout.inSeconds}s for build and start");
   }
 
@@ -68,13 +68,14 @@ class FlutterRunProcessHandler {
       "--observatory-port",
       observatoryPort
     ];
-
-    if (flavour != null) {
-      cmdLine.addAll(["--flavor", flavour]);
+    String? flav = this.flavour;
+    if (flav is String) {
+      cmdLine.addAll(["--flavor", flav]);
     }
 
-    if (deviceId != null) {
-      cmdLine.addAll(["-d", deviceId]);
+    String? devId = this.deviceId;
+    if (devId != null) {
+      cmdLine.addAll(["-d", devId]);
     }
 
     if (additionalArguments != null) {
@@ -89,8 +90,9 @@ class FlutterRunProcessHandler {
   Future startApp() async {
     _log.info("flutter ${cmdLine.join(' ')}");
 
-    _runningProcess = await Process.start("flutter", cmdLine,
+    Process _runningProcess = await Process.start("flutter", cmdLine,
         workingDirectory: _workingDirectory, runInShell: true);
+    this._runningProcess = _runningProcess;
     _processStdoutStream =
         _runningProcess.stdout.transform(utf8.decoder).asBroadcastStream();
     _processStderrStream =
@@ -102,14 +104,14 @@ class FlutterRunProcessHandler {
     _openSubscriptions.add(_processStderrStream.listen((events) async {
       stderr
           .writeln(">> ${FAIL_COLOUR}Flutter run error: $events$RESET_COLOUR");
-           // Get the exit code of flutter run and stop if there is an error so we don't have to wait for the timeout
-          exit(await _runningProcess.exitCode);
+      // Get the exit code of flutter run and stop if there is an error so we don't have to wait for the timeout
+      exit(await _runningProcess.exitCode);
     }));
-    
   }
 
   // attempts to restart the running app
   Future restart() async {
+    Process? _runningProcess = this._runningProcess;
     if (_runningProcess != null) {
       _runningProcess.stdin.write("R");
       return waitForConsoleMessage(
@@ -126,6 +128,7 @@ class FlutterRunProcessHandler {
     print("closing app.");
     int exitCode = -1;
     _ensureRunningProcess();
+    Process? _runningProcess = this._runningProcess;
     if (_runningProcess != null) {
       _runningProcess.stdin.write("q");
       await waitForConsoleMessage(_finished, "Application not finished!!!", "");
@@ -143,10 +146,10 @@ class FlutterRunProcessHandler {
       RegExp search, String timeoutException, String failMessage) {
     _ensureRunningProcess();
     final completer = Completer<String>();
-    StreamSubscription stdoutSub;
-    StreamSubscription stderrSub;
+    StreamSubscription? stdoutSub;
+    StreamSubscription? stderrSub;
 
-    Timer timer;
+    Timer? timer;
 
     stderrSub = _processStderrStream.listen((logLine) {
       if (_errorRegex.hasMatch(logLine)) {
@@ -170,7 +173,7 @@ class FlutterRunProcessHandler {
         stdoutSub?.cancel();
         stderrSub?.cancel();
         if (!completer.isCompleted) {
-          completer.complete(search.firstMatch(logLine).group(1));
+          completer.complete(search.firstMatch(logLine)?.group(1));
         }
       } else if (_noConnectedDeviceRegex.hasMatch(logLine)) {
         timer?.cancel();

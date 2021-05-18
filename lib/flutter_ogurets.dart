@@ -4,19 +4,19 @@ final Logger _log = Logger('ogurets_flutter');
 
 /// This just follows the traditional world pattern
 class FlutterOgurets {
-  String _port;
-  FlutterDriver _driver;
-  FlutterRunProcessHandler _handler;
+  String? _port;
+  FlutterDriver? _driver;
+  FlutterRunProcessHandler? _handler;
   bool started = false;
   bool _leaveRunning = false;
   bool _resetByDefault = true;
-  bool _resetOverride;
+  bool? _resetOverride;
   bool _canReset = false;
-  String _targetApp;
+  String? _targetApp;
   String _workingDirectory = '.';
   int _waitDelayAfterRestartInMilliseconds = 2000;
 
-  FlutterDriver get driver => _driver;
+  FlutterDriver? get driver => _driver;
 
   @BeforeRun(order: -999999)
   void init() async {
@@ -54,7 +54,7 @@ class FlutterOgurets {
   }
 
   bool get isAndroid =>
-      _handler != null && _handler.platform == DriverPlatform.android;
+      _handler != null && _handler!.platform == DriverPlatform.android;
 
   void leaveRunning(bool l) {
     this._leaveRunning = l;
@@ -89,9 +89,9 @@ class FlutterOgurets {
         flavour: Platform.environment['OGURETS_FLUTTER_FLAVOUR'],
         deviceId: Platform.environment['OGURETS_FLUTTER_DEVICE_ID'],
         additionalArguments:
-            Platform.environment['OGURETS_ADDITIONAL_ARGUMENTS']);
-    await _handler.run();
-    _port = await _handler.waitForObservatoryDebuggerUri();
+            Platform.environment['OGURETS_ADDITIONAL_ARGUMENTS'] ?? '');
+    await _handler!.run();
+    _port = await _handler!.waitForObservatoryDebuggerUri();
     _log.info("application started, exposed observatory port $_port");
   }
 
@@ -101,23 +101,23 @@ class FlutterOgurets {
     }
 
     // check if we have a reset override and it is set to false
-    if (_resetOverride != null && !_resetOverride) {
+    if (_resetOverride != null && !_resetOverride!) {
       _resetOverride = null;
       return null;
     }
 
-    if (!_resetByDefault && _resetOverride != null && _resetOverride) {
+    if (!_resetByDefault && _resetOverride != null && _resetOverride!) {
       _resetOverride = null; // we have been overridden to force a reset
     }
 
     // if we have an open driver, close it as a restart will kill it
     if (_driver != null) {
-      await _driver.close();
+      await _driver!.close();
     }
 
     // now hit "R" on the currently running app
     _log.info("Waiting for restart of driver");
-    await _handler.restart();
+    await _handler!.restart();
     var c = Completer();
 
     // now wait for 2 seconds and then reconnect - not waiting causes it to fail
@@ -134,13 +134,13 @@ class FlutterOgurets {
   Future quit() async {
     // if we have an open driver, close it as a restart will kill it
     if (_driver != null) {
-      await _driver.close();
+      await _driver!.close();
     }
 
     // now hit "Q" on the currently running app
-    await _handler.terminate();
-    await _handler.restart();
-    _port = await _handler.waitForObservatoryDebuggerUri();
+    await _handler!.terminate();
+    await _handler!.restart();
+    _port = await _handler!.waitForObservatoryDebuggerUri();
     var c = Completer();
 
     // now wait for 2 seconds and then reconnect - not waiting causes it to fail
@@ -162,13 +162,13 @@ class FlutterOgurets {
   Future close() async {
     if (_driver != null) {
       _log.info("Closing flutter driver");
-      await _driver.close();
+      await _driver?.close();
       _driver = null;
     }
 
     if (_handler != null && !_leaveRunning) {
       _log.info("Waiting for run application to close...");
-      await _handler.terminate();
+      await _handler?.terminate();
       _handler = null;
     }
   }

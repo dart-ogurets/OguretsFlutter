@@ -1,7 +1,7 @@
 part of ogurets_flutter;
 
 class FlutterHooks {
-  final FlutterOgurets world;
+  late final FlutterOgurets world;
 
   FlutterHooks(this.world);
 
@@ -52,18 +52,14 @@ class FlutterHooks {
   }
 
   Future _takescreenshot(ScenarioStatus instanceScenario) async {
-    String dir = Platform.environment['SCREENSHOT_DIR'];
+    var dir = Platform.environment['SCREENSHOT_DIR'];
     if (dir != null) {
       // ensure directory exists
       await Directory(dir).create(recursive: true);
       // filename is scenario name + timestamp
-      String filename = dir +
-          "/" +
-          instanceScenario.scenario.name +
-          "-" +
-          DateTime.now().millisecondsSinceEpoch.toString() +
-          ".jpg";
-      final bytes = await world.driver.screenshot();
+      var filename = dir +
+          '/${instanceScenario.scenario.name}-${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final bytes = await world!.driver!.screenshot();
       await File(filename).writeAsBytes(bytes, flush: true);
     }
   }
