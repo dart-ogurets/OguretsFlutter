@@ -16,18 +16,20 @@ class FlutterOguretsHelperStepdefs {
     var dir = Platform.environment['SCREENSHOT_DIR'];
     var platformName = Platform.environment['SCREENSHOT_PLATFORM'];
     if (dir != null) {
-      String fullDir = platformName != null ? '$dir/$platformName' : dir;
+      var fullDir = platformName != null ? '$dir/$platformName' : dir;
       // ensure directory exists
       await Directory(fullDir).create(recursive: true);
       // filename is scenario name + timestamp
-      String filename = "$fullDir/$shotname.jpg";
-      final bytes = await _world!.driver!.screenshot();
+      var filename = '$fullDir/$shotname.jpg';
+      final bytes = await _world.driver!.screenshot();
 
       if (_state.maxWidth != null || _state.maxHeight != null) {
-        Image src = decodeImage(bytes);
-        Image copy =
-            copyResize(src, width: _state.maxWidth, height: _state.maxHeight);
-        await File(filename).writeAsBytes(encodeJpg(copy), flush: true);
+        var src = decodeImage(bytes);
+        if (src != null) {
+          var copy =
+              copyResize(src, width: _state.maxWidth, height: _state.maxHeight);
+          await File(filename).writeAsBytes(encodeJpg(copy), flush: true);
+        }
       } else {
         await File(filename).writeAsBytes(bytes, flush: true);
       }

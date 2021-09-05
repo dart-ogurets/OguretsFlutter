@@ -58,8 +58,8 @@ class FlutterHooks {
       await Directory(dir).create(recursive: true);
       // filename is scenario name + timestamp
       var filename = dir +
-          '/${instanceScenario.scenario.name}-${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final bytes = await world!.driver!.screenshot();
+          '/${instanceScenario.scenario?.name}-${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final bytes = await world.driver!.screenshot();
       await File(filename).writeAsBytes(bytes, flush: true);
     }
   }
