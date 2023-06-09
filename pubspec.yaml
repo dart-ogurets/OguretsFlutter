@@ -17,7 +17,6 @@ dependencies:
   flutter_driver:
     sdk: flutter
   logging: ^0.11.3+2
-  commandline_splitter: ^1.5.2
   image: ^2.1.4
 
 dev_dependencies:
